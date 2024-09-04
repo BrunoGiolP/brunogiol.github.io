@@ -10005,3 +10005,7 @@ html {
   overflow: hidden;
   height: 300px;
 }
+
+.portfolio-item .mb-2{
+  height: 300px;
+}

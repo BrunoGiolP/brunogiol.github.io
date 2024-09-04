@@ -10000,3 +10000,8 @@ h6,
 html {
   scroll-behavior: smooth;
 }
+
+.portfolio-item{
+  overflow: hidden;
+  height: 300px;
+}

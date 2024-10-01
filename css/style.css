@@ -9986,15 +9986,17 @@ h6,
 
 /* NUEVOS */
 
-.contenedor_profileimg{
+.contenedor_profileimg {
   border-radius: 50%;
-    overflow: hidden;
-    height: 470px;
+  overflow: hidden;
+  height: 17rem;
+  width: 17rem;
+  position: relative;
 }
 
-.contenedor_profileimg img{
-  position: relative;
-    bottom: 100%;
+.contenedor_profileimg img {
+  position: absolute;
+  bottom: 0;
 }
 
 html {
@@ -10009,3 +10011,5 @@ html {
 .portfolio-item .mb-2{
   height: 300px;
 }
+
+@media only screen and max-width()

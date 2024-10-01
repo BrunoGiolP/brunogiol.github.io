@@ -9999,6 +9999,15 @@ h6,
   bottom: 0;
 }
 
+.portfolio-item {
+  overflow: hidden;
+  padding: 0;
+  height: 300px;
+  box-shadow: 7px 7px 14px -3px rgba(0, 0, 0, 0.39);
+  -webkit-box-shadow: 7px 7px 14px -3px rgba(0, 0, 0, 0.39);
+  -moz-box-shadow: 7px 7px 14px -3px rgba(0, 0, 0, 0.39);
+}
+
 html {
   scroll-behavior: smooth;
 }

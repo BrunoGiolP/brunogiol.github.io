@@ -9999,7 +9999,14 @@ h6,
   bottom: 0;
 }
 
-
+#qualification a {
+  color: #0BCEAF;
+  text-decoration: none;
+  border: 1px solid #0BCEAF;
+  background-color: transparent;
+  padding: 10px;
+  border-radius: 30px;
+}
 
 html {
   scroll-behavior: smooth;
@@ -10024,3 +10031,4 @@ html {
     -moz-box-shadow: 7px 7px 14px -3px rgba(0, 0, 0, 0.39);
 }
 }
+

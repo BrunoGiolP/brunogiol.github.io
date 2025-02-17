@@ -10008,6 +10008,16 @@ h6,
   border-radius: 30px;
 }
 
+#qualification a:hover {
+  color: white;
+  background-color: #0BCEAF;
+  border: 1px solid #0BCEAF;
+  padding: 10px;
+  border-radius: 30px;
+}
+
+
+
 html {
   scroll-behavior: smooth;
 }

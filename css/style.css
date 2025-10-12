@@ -10042,3 +10042,7 @@ html {
 }
 }
 
+
+h1.display-3.text-uppercase.text-primary.mb-2 {
+    color: white !important;
+}

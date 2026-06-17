@@ -105,11 +105,27 @@
 
 
     // Lightbox: block body scroll when open, restore when closed
-    $(document).on('open.lightbox', function () {
-        $('body').css('overflow', 'hidden');
-    });
-    $(document).on('close.lightbox', function () {
-        $('body').css('overflow', '');
+    // Lightbox2 doesn't fire events, so we use a MutationObserver on #lightbox
+    $(document).ready(function () {
+        var lightboxObserver = new MutationObserver(function () {
+            var $lb = $('#lightbox');
+            if ($lb.length) {
+                if ($lb.css('display') !== 'none') {
+                    $('body').css('overflow', 'hidden');
+                } else {
+                    $('body').css('overflow', '');
+                }
+            }
+        });
+
+        // #lightbox is injected dynamically by the lib, so wait for it
+        var waitForLightbox = setInterval(function () {
+            var lb = document.getElementById('lightbox');
+            if (lb) {
+                clearInterval(waitForLightbox);
+                lightboxObserver.observe(lb, { attributes: true, attributeFilter: ['style'] });
+            }
+        }, 200);
     });
 
 

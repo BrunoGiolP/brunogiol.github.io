@@ -112,6 +112,12 @@
         loop: true,
         items: 1
     });
+
+
+    // Block page scroll when lightbox is open
+    lightbox.option({
+        disableScrolling: true
+    });
     
 })(jQuery);
 

@@ -114,9 +114,36 @@
     });
 
 
-    // Block page scroll when lightbox is open
-    lightbox.option({
-        disableScrolling: true
+    // Block page scroll when lightbox is open without jumping to top
+    var scrollY = 0;
+    $('body').on('click', 'a[data-lightbox]', function () {
+        scrollY = window.scrollY;
+        $('body').css({
+            overflow: 'hidden',
+            position: 'fixed',
+            top: -scrollY + 'px',
+            width: '100%'
+        });
+    });
+    $(document).on('click', '#lightboxOverlay, .lb-close, .lb-cancel', function () {
+        $('body').css({
+            overflow: '',
+            position: '',
+            top: '',
+            width: ''
+        });
+        window.scrollTo(0, scrollY);
+    });
+    $(document).on('keyup', function (e) {
+        if (e.key === 'Escape') {
+            $('body').css({
+                overflow: '',
+                position: '',
+                top: '',
+                width: ''
+            });
+            window.scrollTo(0, scrollY);
+        }
     });
     
 })(jQuery);

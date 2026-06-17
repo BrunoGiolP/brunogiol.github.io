@@ -104,6 +104,15 @@
     });
 
 
+    // Lightbox: block body scroll when open, restore when closed
+    $(document).on('open.lightbox', function () {
+        $('body').css('overflow', 'hidden');
+    });
+    $(document).on('close.lightbox', function () {
+        $('body').css('overflow', '');
+    });
+
+
     // Testimonials carousel
     $(".testimonial-carousel").owlCarousel({
         autoplay: true,

@@ -575,6 +575,33 @@
     </div>
     <!-- Footer End -->
 
+    <!-- Chatbot Start -->
+    <div id="chatbot-wrapper">
+        <!-- Toggle Button -->
+        <button id="chatbot-toggle" aria-label="Abrir chat">
+            <i class="fa fa-comment-dots" id="chatbot-icon-open"></i>
+            <i class="fa fa-times" id="chatbot-icon-close" style="display:none;"></i>
+        </button>
+
+        <!-- Chat Window -->
+        <div id="chatbot-window" aria-live="polite">
+            <div id="chatbot-header">
+                <div class="chatbot-avatar">BG</div>
+                <div>
+                    <strong>Bruno Giol</strong>
+                    <span class="chatbot-status">● Online</span>
+                </div>
+            </div>
+            <div id="chatbot-messages"></div>
+            <div id="chatbot-suggestions"></div>
+            <div id="chatbot-input-area">
+                <input type="text" id="chatbot-input" placeholder="Escribe un mensaje..." autocomplete="off" aria-label="Mensaje">
+                <button id="chatbot-send" aria-label="Enviar"><i class="fa fa-paper-plane"></i></button>
+            </div>
+        </div>
+    </div>
+    <!-- Chatbot End -->
+
     <!-- Scroll to Bottom -->
     <a href="#about"><i class="fa fa-2x fa-angle-down text-white scroll-to-bottom"></i></a>
 

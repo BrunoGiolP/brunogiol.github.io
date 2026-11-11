@@ -521,7 +521,7 @@
                         </div>
                     </div>
                 </a>
-                <a href="img/ONPE/clv_video.mov" data-lightbox="portfolio" class="col-lg-4 col-md-6 mb-4 portfolio-item first">
+                <a href="#" data-toggle="modal" data-target="#portfolioVideoModal" data-video="img/ONPE/clv_video.mov" class="col-lg-4 col-md-6 mb-4 portfolio-item first">
                     <div class="position-relative overflow-hidden mb-2">
                         <img class="img-fluid rounded w-100" src="img/ONPE/clv.jpg" alt="">
                         <div class="portfolio-btn bg-primary d-flex align-items-center justify-content-center">
@@ -541,6 +541,26 @@
 
 
 
+
+    <!-- Portfolio Video Modal Start -->
+    <div class="modal fade" id="portfolioVideoModal" tabindex="-1" role="dialog" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
+            <div class="modal-content bg-dark border-0">
+                <div class="modal-body p-2">
+                    <button type="button" class="close text-white position-absolute" style="top:10px;right:15px;z-index:1;" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                    <div class="embed-responsive embed-responsive-16by9">
+                        <video id="portfolioVideo" controls class="embed-responsive-item">
+                            <source id="portfolioVideoSource" src="" type="video/mp4">
+                            Tu navegador no soporta la reproducción de video.
+                        </video>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Portfolio Video Modal End -->
 
     <!-- Footer Start -->
     <div class="container-fluid bg-primary text-white mt-5 py-5 px-sm-3 px-md-5">

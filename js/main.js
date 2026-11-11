@@ -129,7 +129,30 @@
     });
 
 
-    // Testimonials carousel
+    // Portfolio Video Modal
+    $(document).ready(function () {
+        $('#portfolioVideoModal').on('show.bs.modal', function (e) {
+            var videoSrc = $(e.relatedTarget).data('video');
+            var $video = $('#portfolioVideo');
+            var $source = $('#portfolioVideoSource');
+            // Set src based on file type
+            var ext = videoSrc.split('.').pop().toLowerCase();
+            var mimeType = ext === 'mov' ? 'video/mp4' : 'video/' + ext;
+            $source.attr('src', videoSrc).attr('type', mimeType);
+            $video[0].load();
+        });
+
+        $('#portfolioVideoModal').on('hidden.bs.modal', function () {
+            var $video = $('#portfolioVideo');
+            $video[0].pause();
+            $video[0].currentTime = 0;
+            $('#portfolioVideoSource').attr('src', '');
+            $video[0].load();
+        });
+    });
+
+
+
     $(".testimonial-carousel").owlCarousel({
         autoplay: true,
         smartSpeed: 1500,

@@ -170,150 +170,247 @@
 
 
 /* =========================================
-   CHATBOT
+   CHATBOT v3 — Frictionless UX Architecture
    ========================================= */
 (function () {
     "use strict";
 
-    // ── Knowledge base ──────────────────────────────────────────────
+    // ── Estado de sesion ────────────────────────────────────────────
+    var lastKey      = null;   // ultima intencion resuelta
+    var lastResponse = "";     // ultima respuesta enviada
+    var fallbackCount = 0;     // contador de fallbacks consecutivos
+
+    // ── Knowledge Base ──────────────────────────────────────────────
     var KB = {
+
+        // ── 2. Intencion y Acceso ──────────────────────────────────
+
         greeting: {
-            patterns: ["hola", "hi", "hello", "buenas", "buenos dias", "buen dia", "hey", "saludos", "que tal", "como estas", "buenas tardes", "buenas noches"],
+            patterns: ["hola", "hi", "hello", "buenas", "buenos dias", "buen dia", "hey", "saludos", "que tal", "como estas", "buenas tardes", "buenas noches", "inicio", "empezar", "comenzar"],
             responses: [
-                "Hola! Soy el asistente virtual de Bruno. Que te gustaria saber?",
-                "Hey! Que bueno que estes por aca. En que te puedo ayudar?",
-                "Hola! Encantado de saludarte. Puedo contarte sobre Bruno, su experiencia, servicios o como contactarlo."
+                "Hola! Soy el asistente de Bruno Giol, UX/UI Designer con 8+ anios de experiencia. Con que puedo ayudarte?",
+                "Hey! Que bueno que estes por aca. Soy el bot de Bruno. Puedo contarte sobre su trayectoria, servicios o ayudarte a contactarlo.",
+                "Hola! Encantado. Cuento con info sobre la experiencia, habilidades y servicios de Bruno. Por donde empezamos?"
             ],
-            chips: ["Quien es Bruno?", "Servicios", "Experiencia", "Contacto"]
+            chips: ["Soy reclutador", "Busco freelancer", "Quien es Bruno?", "Ver experiencia"]
         },
+
+        // Ruta Reclutador — acceso express
+        recruiter: {
+            patterns: ["soy reclutador", "recursos humanos", "rrhh", "seleccion", "busco candidato", "busco perfil", "head hunter", "reclutador", "reclutadora", "hiring", "contratacion"],
+            responses: [
+                "Perfecto! Aqui el resumen ejecutivo de Bruno:\n\nUX/UI Designer + Scrum Master · 8 anios exp.\nActual: ONPE (03/2025)\nAnterior: Stefanini LATAM, Belcorp, Clinica Internacional\nCertificaciones: CSM (Scrum Alliance), UX/UI (Miami Ad School), PM (Ingenium)\n\nPuedes descargar su CV completo o ver su portfolio ahora mismo.",
+                "Hola! Para perfiles de seleccion, Bruno tiene:\n\nSenior UX/UI Designer | Scrum Master certificado\n8+ anios · Lima, Peru · Disponible\n\nTe recomiendo descargar el CV o escribirle directo al LinkedIn."
+            ],
+            chips: ["Descargar CV", "Ver portfolio", "Contacto directo", "Ver experiencia"]
+        },
+
+        // Ruta Cliente / Freelance
+        client: {
+            patterns: ["soy cliente", "busco freelancer", "busco freelance", "necesito diseñador", "necesito disenador", "necesito ux", "necesito ui", "tengo un proyecto", "quiero contratar", "presupuesto", "cotizacion", "cuanto cobra", "tarifa"],
+            responses: [
+                "Genial! Bruno esta disponible para proyectos freelance. Trabaja en:\n\n- Diseno UX/UI (apps, webs, sistemas)\n- Prototipado en Figma\n- Service Design y flujos conversacionales\n- Desarrollo frontend (HTML/CSS/JS)\n\nCuentame un poco de tu proyecto y te paso sus datos para coordinar.",
+                "Bruno esta abierto a proyectos freelance. Para darte mas detalle sobre disponibilidad y tarifas, lo mejor es escribirle directamente. Tiene respuesta rapida!"
+            ],
+            chips: ["Ver servicios", "Ver portfolio", "Contacto directo", "Descargar CV"]
+        },
+
+        // ── Sobre Bruno ───────────────────────────────────────────
         about: {
-            patterns: ["quien es", "quien eres", "sobre bruno", "cuentame", "presentate", "presentacion", "acerca", "de que trata", "que es esto", "info", "mas sobre"],
+            patterns: ["quien es", "quien eres", "sobre bruno", "cuentame", "presentate", "presentacion", "acerca", "de que trata", "que es esto", "info", "mas sobre", "resume", "resumen"],
             responses: [
-                "Bruno Giol es un UX/UI Designer, Web Developer y Scrum Master con mas de 8 anios de experiencia creando productos digitales centrados en el usuario.\n\nHa trabajado en empresas como Belcorp, Stefanini LATAM, ONPE y Wasi Mikuna, liderando diseno de interfaces, prototipos y ceremonias agiles.",
-                "Bruno es un profesional creativo y versatil. Combina diseno de experiencias (UX/UI), desarrollo web frontend y gestion agil como Scrum Master. Con mas de 8 anios en el rubro, ha trabajado tanto en agencias como en grandes empresas del Peru."
+                "Bruno Giol es un UX/UI Designer, Web Developer y Scrum Master con mas de 8 anios de experiencia creando productos digitales centrados en el usuario.\n\nActualmente trabaja en la ONPE y ha pasado por Belcorp, Stefanini LATAM y Wasi Mikuna, liderando diseno de interfaces, prototipos y ceremonias agiles.",
+                "Bruno combina diseno de experiencias (UX/UI), desarrollo frontend y gestion agil como Scrum Master. Con 8+ anios en el rubro, ha trabajado en corporativos, agencias y organismos del Estado peruano."
             ],
-            chips: ["Servicios", "Experiencia", "Habilidades", "Contacto"]
+            chips: ["Ver experiencia", "Servicios", "Habilidades", "Contacto directo"]
         },
-        services: {
-            patterns: ["servicio", "servicios", "que hace", "que ofrece", "en que ayuda", "que puede hacer", "para que sirve", "como puede ayudar"],
-            responses: [
-                "Bruno ofrece estos servicios:\n\n UX/UI Design — diseno de interfaces y experiencias de usuario\n Web Development — frontend con HTML, CSS y JS\n Scrum Master — gestion agil de equipos y sprints\n Service Design — diseno de servicios centrados en el cliente\n\nTe interesa alguno en particular?",
-                "Dependiendo de lo que necesites, Bruno puede ayudarte con:\n\n- Diseno de productos digitales (apps, webs)\n- Prototipado en Figma\n- Desarrollo frontend\n- Implementacion de metodologias agiles\n\nTienes algun proyecto en mente?"
-            ],
-            chips: ["Portfolio", "Experiencia", "Contacto", "Esta disponible?"]
-        },
+
+        // ── 3. Trayectoria y Casos ─────────────────────────────────
+
         experience: {
-            patterns: ["experiencia", "donde trabajo", "donde ha trabajado", "empresas", "trayectoria", "carrera", "trabajo en", "historial", "cv", "curriculum"],
+            patterns: ["experiencia", "donde trabajo", "donde ha trabajado", "empresas", "trayectoria", "carrera", "trabajo en", "historial", "cv", "curriculum", "todas las empresas", "todas"],
             responses: [
-                "Bruno tiene mas de 8 anios de experiencia. Su trayectoria incluye:\n\n ONPE — UX/UI Designer (03/2025 - actualidad)\n Wasi Mikuna — Senior UX/UI + Scrum Master (12/2024 - 02/2025)\n Stefanini LATAM — Senior UX/UI + Scrum Master (11/2022 - 11/2024)\n Belcorp — UI Designer / Front-End (09/2019 - 11/2022)\n Clinica Internacional — Digital Designer (10/2018 - 09/2019)\n\nQuieres saber mas de alguna empresa?",
-                "Ha pasado por empresas muy diversas: desde agencias y corporativos hasta organismos del Estado. Que empresa te interesa conocer?"
+                "Bruno tiene 8+ anios de experiencia:\n\nONPE — UX/UI Designer (03/2025 · actual)\nWasi Mikuna — Sr. UX/UI + SM (12/2024-02/2025)\nStefanini LATAM — Sr. UX/UI + SM (11/2022-11/2024)\nBelcorp — UI Designer / FE (09/2019-11/2022)\nClinica Internacional — Digital Designer (10/2018-09/2019)\nNativos Digitales — UI + FE (08/2016-10/2018)\n\nQue empresa te interesa?",
+                "Ha trabajado en 6 empresas distintas, desde agencias hasta el sector publico. Cual quieres conocer mejor?"
             ],
-            chips: ["ONPE", "Stefanini", "Belcorp", "Contacto"]
+            chips: ["ONPE", "Stefanini", "Belcorp", "Wasi Mikuna", "Clinica Internacional"]
         },
+
         onpe: {
-            patterns: ["onpe", "elecciones", "gobierno", "estado", "publico", "sector publico", "electoral"],
+            patterns: ["onpe", "elecciones", "gobierno", "estado", "publico", "sector publico", "electoral", "procesos electorales"],
             responses: [
-                "Actualmente Bruno trabaja en la ONPE (Oficina Nacional de Procesos Electorales) como UX/UI Designer desde marzo del 2025.\n\nAhi esta trabajando en el diseno de interfaces para sistemas internos y externos vinculados a los procesos electorales del Peru, aplicando UX Research, prototipado y pruebas con usuarios.",
-                "En la ONPE, Bruno aplica todo su expertise en UX/UI para mejorar sistemas criticos del organismo electoral peruano. Es su rol mas reciente y esta enfocado en crear experiencias claras y accesibles para un contexto de alto impacto ciudadano."
+                "Bruno trabaja actualmente en la ONPE (Oficina Nacional de Procesos Electorales) como UX/UI Designer desde marzo 2025.\n\nDiseña interfaces para sistemas internos y externos vinculados a procesos electorales del Peru, aplicando UX Research, prototipado en Figma y pruebas con usuarios reales.",
+                "Su rol actual en la ONPE es de alto impacto ciudadano: mejora la experiencia de sistemas electorales criticos del pais. Es su posicion mas reciente y sigue activo ahi."
             ],
-            chips: ["Otras empresas", "Habilidades", "Portfolio", "Contacto"]
+            chips: ["Todas las empresas", "Stefanini", "Habilidades", "Ver portfolio"]
         },
+
         stefanini: {
             patterns: ["stefanini", "scharff", "courier", "facturacion"],
             responses: [
-                "En Stefanini LATAM (2022-2024) Bruno trabajo como Senior UX/UI Designer y Scrum Master. Sus principales logros:\n\n- Diseno del nuevo sistema Courier y de Facturacion para Scharff\n- Elaboracion de Customer Journey Maps y User Flows\n- Gestion de ceremonias Scrum con el equipo y el PO\n- Pruebas de usuario y metricas de producto"
+                "En Stefanini LATAM (11/2022-11/2024) fue Senior UX/UI Designer y Scrum Master:\n\n- Diseno del sistema Courier y Facturacion para Scharff\n- Customer Journey Maps y User Flows\n- Gestion de ceremonias Scrum (Planning, Daily, Review, Retro)\n- Pruebas de usuario y metricas de producto",
+                "Stefanini fue donde Bruno consolido su rol dual: disenador + Scrum Master. El proyecto estrella fue el rediseno completo de los sistemas de Scharff Courier y Facturacion."
             ],
-            chips: ["ONPE", "Belcorp", "Habilidades", "Contacto"]
+            chips: ["Todas las empresas", "ONPE", "Belcorp", "Ver portfolio"]
         },
+
         belcorp: {
             patterns: ["belcorp", "esika", "cyzone", "lbel", "mailing", "sap"],
             responses: [
-                "En Belcorp (2019-2022) Bruno fue UI Designer y Front-End Developer. Trabajo en:\n\n- Entrevistas a usuarios y creacion de User Personas\n- Diseno de interfaces para usuarias finales (Esika, Cyzone, L'Bel)\n- Desarrollo de mailings en SAP Marketing Cloud\n- Prototipado de paginas web internas\n\nPuedes ver algunos de esos disenos en la seccion Portfolio de esta pagina."
+                "En Belcorp (09/2019-11/2022) fue UI Designer y Front-End Developer:\n\n- Entrevistas a usuarios y User Personas\n- Diseno de interfaces para Esika, Cyzone y L'Bel\n- Desarrollo de mailings en SAP Marketing Cloud\n- Prototipado de paginas web internas\n\nPuedes ver estos disenos en la seccion Portfolio.",
+                "Belcorp fue su mayor etapa en diseno grafico-digital: 3 anios creando campanas para las marcas Esika, Cyzone y L'Bel a nivel Latinoamerica."
             ],
-            chips: ["Ver portfolio", "ONPE", "Stefanini", "Contacto"]
+            chips: ["Ver portfolio", "Todas las empresas", "ONPE", "Stefanini"]
         },
+
         wasimikuna: {
             patterns: ["wasi mikuna", "qaliwarma", "wasi", "mikuna", "alimentacion"],
             responses: [
-                "En Wasi Mikuna -antes conocido como Qaliwarma- (12/2024 - 02/2025), Bruno fue Senior UX/UI + Scrum Master. Trabajo en:\n\n- Diseno de un nuevo modulo de quejas y call center\n- Prototipado web con foco en accesibilidad\n- Gestion de backlog junto al Product Owner\n- Ceremonias Scrum: Planning, Daily, Review y Retro"
+                "En Wasi Mikuna (ex Qaliwarma) (12/2024-02/2025) fue Senior UX/UI + Scrum Master:\n\n- Nuevo modulo de quejas y call center\n- Prototipado web con foco en accesibilidad\n- Gestion de backlog con el PO\n- Ceremonias Scrum completas"
             ],
-            chips: ["ONPE", "Stefanini", "Habilidades", "Contacto"]
+            chips: ["Todas las empresas", "ONPE", "Habilidades", "Contacto directo"]
         },
+
+        clinica: {
+            patterns: ["clinica", "clinica internacional", "clinica int", "salud", "reserva de citas", "citas medicas"],
+            responses: [
+                "En Clinica Internacional (10/2018-09/2019) fue Digital Designer:\n\n- Piezas graficas para campanas de marketing digital\n- Prototipado de paginas web internas\n- Creacion del flujo de reserva de citas web\n- Prototipado de app mobile"
+            ],
+            chips: ["Todas las empresas", "Belcorp", "Habilidades", "Ver portfolio"]
+        },
+
+        // ── 4. Servicios y Habilidades ─────────────────────────────
+
+        services: {
+            patterns: ["servicio", "servicios", "que hace", "que ofrece", "en que ayuda", "que puede hacer", "para que sirve", "como puede ayudar", "valor", "servicios y valor"],
+            responses: [
+                "Bruno ofrece:\n\nUX/UI Design — investigacion, wireframes, prototipos en Figma\nService Design y Bots — diseno de flujos conversacionales\nFront-End — HTML, CSS, JS, Bootstrap\nScrum Master — ceremonias, backlog, metricas agiles\n\nTe interesa alguno en particular?",
+                "Su propuesta de valor combina diseno centrado en el usuario con capacidad de desarrollo e implementacion agil. No solo diseña: tambien prototipa, itera y acompana al equipo de desarrollo."
+            ],
+            chips: ["UX/UI y Prototipado", "Service Design y Bots", "Front-End", "Esta disponible?"]
+        },
+
+        uxui: {
+            patterns: ["ux", "ui", "ux ui", "prototipo", "prototipado", "figma", "wireframe", "investigacion", "user research", "diseno de interfaces", "diseno de experiencias"],
+            responses: [
+                "El core de Bruno es el UX/UI:\n\n- UX Research: entrevistas, User Persona, Journey Map\n- Arquitectura de informacion y User Flow\n- Wireframes y prototipado en Figma\n- Pruebas de usuario e iteracion\n- Diseno accesible (WCAG awareness)\n\nTiene proyectos en banca, salud, logistica, gobierno y retail."
+            ],
+            chips: ["Ver portfolio", "Service Design y Bots", "Habilidades", "Contacto directo"]
+        },
+
+        servicedesign: {
+            patterns: ["service design", "bot", "bots", "chatbot", "flujo conversacional", "conversacional", "arquitectura conversacional", "diseno de servicios"],
+            responses: [
+                "Bruno tiene experiencia en Service Design y diseno de chatbots conversacionales:\n\n- Mapeo de flujos de alta conversion\n- Arquitectura conversacional (como este mismo chatbot!)\n- Customer Journey Map end-to-end\n- Diseno de touchpoints digitales y fisicos\n\nEste chatbot que estas usando fue disenado y desarrollado por el."
+            ],
+            chips: ["Ver flujo del chatbot", "UX/UI y Prototipado", "Ver portfolio", "Contacto directo"]
+        },
+
+        frontend: {
+            patterns: ["frontend", "front end", "desarrollo web", "html", "css", "javascript", "bootstrap", "codigo", "programacion", "web developer", "desarrollo"],
+            responses: [
+                "Bruno tambien desarrolla frontend:\n\n- HTML5, CSS3, JavaScript\n- Bootstrap y responsive design\n- Accesibilidad web\n- Mailing en SAP Marketing Cloud\n\nCombina diseno e implementacion, lo que reduce friccion entre el equipo de diseno y desarrollo."
+            ],
+            chips: ["UX/UI y Prototipado", "Habilidades", "Ver portfolio", "Contacto directo"]
+        },
+
         skills: {
-            patterns: ["habilidad", "habilidades", "skill", "skills", "tecnologia", "tecnologias", "herramienta", "herramientas", "sabe", "conoce", "domina", "maneja", "usa"],
+            patterns: ["habilidad", "habilidades", "skill", "skills", "tecnologia", "tecnologias", "herramienta", "herramientas", "sabe", "conoce", "domina", "maneja", "usa", "stack"],
             responses: [
-                "Bruno maneja un stack bastante completo:\n\nDiseno: Figma, Adobe XD, Photoshop, Illustrator\nDev: HTML5, CSS3, JavaScript, Bootstrap\nAgile: Scrum, gestion de backlog, metricas\nUX: Customer Journey Map, User Persona, User Flow\nTesting: pruebas de usuario, iteracion\n\nAlgo en particular te interesa?",
-                "En herramientas de diseno domina Figma principalmente, ademas de toda la suite de Adobe. En desarrollo maneja el frontend clasico y Bootstrap. Y en metodologias agiles esta certificado como Scrum Master por Scrum Alliance."
+                "Stack completo de Bruno:\n\nDiseno: Figma, Adobe XD, Photoshop, Illustrator\nDev: HTML5, CSS3, JavaScript, Bootstrap\nAgile: Scrum, backlog, metricas\nUX: CJM, User Persona, User Flow, pruebas\nBots: arquitectura conversacional, flujos NLP\n\nQue area te interesa mas?",
+                "Su diferencial es la combinacion: diseña, prototipa, desarrolla e implementa metodologias agiles. Es un perfil T-shaped con profundidad en UX/UI."
             ],
-            chips: ["Educacion", "Experiencia", "Portfolio", "Contacto"]
+            chips: ["UX/UI y Prototipado", "Front-End", "Service Design y Bots", "Formacion"]
         },
+
         education: {
-            patterns: ["educacion", "estudio", "estudios", "certificacion", "titulo", "formacion", "universidad", "carrera", "donde estudio", "grado"],
+            patterns: ["educacion", "estudio", "estudios", "certificacion", "titulo", "formacion", "universidad", "carrera", "donde estudio", "grado", "estudios"],
             responses: [
-                "La formacion de Bruno:\n\nDiseno Grafico — ISIL (2011-2015)\nHTML5/CSS3/JS — Area 51 (2016)\nUX/UI/CX — Miami Ad School (2018)\nCertified Scrum Master — Scrum Alliance (2024)\nDesign Thinking — Fundacion Telefonica (2025)\nCertified Project Manager — Ingenium (2025)",
-                "Tiene una base solida en diseno grafico (ISIL) y la complemento con certificaciones internacionales en UX/UI (Miami Ad School), Scrum Master (Scrum Alliance) y recientemente en Design Thinking y Project Management. Siempre en modo aprendizaje."
+                "Formacion de Bruno:\n\nDiseno Grafico — ISIL (2011-2015)\nHTML5/CSS3/JS — Area 51 (2016)\nUX/UI/CX — Miami Ad School (2018)\nCertified Scrum Master — Scrum Alliance (2024)\nDesign Thinking — Fundacion Telefonica (2025)\nCertified Project Manager — Ingenium (2025)",
+                "Siempre en modo aprendizaje: combina una base solida en diseno (ISIL) con certificaciones internacionales en UX (Miami Ad School), agilidad (Scrum Alliance) y gestion de proyectos (Ingenium 2025)."
             ],
-            chips: ["Habilidades", "Experiencia", "Contacto"]
+            chips: ["Habilidades", "Ver experiencia", "Descargar CV", "Contacto directo"]
         },
+
+        // ── 5. Evidencia y Rescate ─────────────────────────────────
+
         portfolio: {
-            patterns: ["portfolio", "portafolio", "proyecto", "proyectos", "trabajo", "trabajos", "diseno", "ver trabajo", "muestra"],
+            patterns: ["portfolio", "portafolio", "proyecto", "proyectos", "trabajo", "trabajos", "diseno", "ver trabajo", "muestra", "evidencia", "ejemplo"],
             responses: [
-                "Puedes verlo en esta misma pagina, en la seccion Portfolio. Encontraras:\n\n- Disenos animados para Esika, Cyzone y L'Bel (Belcorp)\n- Prototipos UX de Scharff, Mapfre y Clinica Internacional\n- El prototipo web de Wasi Mikuna\n- Videos del trabajo en ONPE\n\nQuieres mas detalles de algun proyecto?",
-                "El portfolio esta justo arriba en esta pagina. Puedes filtrar por 'Design' o 'Ux/Ui' para ver cada tipo de trabajo."
+                "El portfolio esta en esta pagina, seccion Portfolio. Incluye:\n\n- Disenos animados Esika, Cyzone, L'Bel (Belcorp)\n- Prototipos UX: Scharff, Mapfre, Clinica Internacional\n- Web Wasi Mikuna\n- Video del trabajo en ONPE\n- Diseno de este chatbot\n\nQue proyecto te interesa?",
+                "Puedes ver el portfolio arriba filtrando por 'Design' o 'Ux/Ui'. Cada item muestra el trabajo real entregado."
             ],
-            chips: ["Belcorp", "Stefanini", "ONPE", "Contacto"]
+            chips: ["Belcorp", "Stefanini", "ONPE", "Ver flujo del chatbot"]
         },
+
+        chatbotflow: {
+            patterns: ["flujo del chatbot", "flujo conversacional", "diagrama", "arquitectura del bot", "como funciona el bot", "como funciona el chatbot"],
+            responses: [
+                "El flujo conversacional de este chatbot fue disenado por Bruno siguiendo principios de Frictionless UX:\n\n- 6 columnas: entrada, intencion, trayectoria, servicios, evidencia y conversion\n- Clasificador ponderado por puntaje (NLP simple)\n- Rutas diferenciadas: reclutador vs cliente\n- Fallback de 2 niveles\n- Guardia anti-repeticion\n\nPuedes ver el diagrama completo en la seccion Portfolio."
+            ],
+            chips: ["Ver portfolio", "Service Design y Bots", "Contacto directo"]
+        },
+
         availability: {
-            patterns: ["disponible", "disponibilidad", "freelance", "contratar", "hire", "colaborar", "trabajar juntos", "proyecto nuevo", "propuesta"],
+            patterns: ["disponible", "disponibilidad", "freelance", "contratar", "hire", "colaborar", "trabajar juntos", "proyecto nuevo", "propuesta", "laboral", "trabajo nuevo"],
             responses: [
-                "Si, Bruno esta disponible para proyectos freelance! Si tienes algo en mente, lo mejor es escribirle directamente para conversar sobre el proyecto. Te paso sus datos?",
-                "Actualmente esta trabajando en ONPE, pero tambien esta abierto a proyectos freelance. Que tipo de proyecto tienes en mente?"
+                "Bruno esta disponible para proyectos freelance en paralelo a su rol en ONPE. Para coordinar disponibilidad y alcance, lo mejor es escribirle directo.",
+                "Actualmente trabaja en ONPE pero esta abierto a proyectos freelance. Que tipo de proyecto tienes?"
             ],
-            chips: ["Contacto", "Servicios", "Portfolio"]
+            chips: ["Contacto directo", "Ver servicios", "Descargar CV"]
         },
+
+        // ── 6. Conversion Agil ─────────────────────────────────────
+
+        cv: {
+            patterns: ["descargar cv", "bajar cv", "cv pdf", "descargar curriculum", "ver cv", "curriculum vitae", "hoja de vida"],
+            responses: [
+                "Puedes descargar el CV de Bruno directamente desde esta pagina: busca el boton 'Download CV' en la seccion principal (inicio). Esta en formato PDF y esta actualizado."
+            ],
+            chips: ["Contacto directo", "Ver portfolio", "Ver experiencia"]
+        },
+
         contact: {
-            patterns: ["contacto", "contactar", "email", "correo", "telefono", "linkedin", "redes", "escribir", "mensaje", "hablar", "comunicar", "donde lo encuentro"],
+            patterns: ["contacto", "contactar", "email", "correo", "telefono", "linkedin", "redes", "escribir", "mensaje", "hablar", "comunicar", "donde lo encuentro", "contacto directo", "multicanal", "whatsapp"],
             responses: [
-                "Claro! Puedes contactar a Bruno por:\n\nEmail: brunogiol78@gmail.com\nTelefono: +51-999-971-342\nLinkedIn: linkedin.com/in/bruno-giol-4a81b477\n\nEl responde rapido!",
-                "La forma mas rapida es por email o LinkedIn:\n\nbrunogiol78@gmail.com\nlinkedin.com/in/bruno-giol-4a81b477\n\nNecesitas algo mas antes de escribirle?"
+                "Contacto directo con Bruno:\n\nEmail: brunogiol78@gmail.com\nTelefono / WhatsApp: +51-999-971-342\nLinkedIn: linkedin.com/in/bruno-giol-4a81b477\n\nResponde rapido por todos los canales!",
+                "La via mas rapida es LinkedIn o WhatsApp:\n\n+51-999-971-342\nlinkedin.com/in/bruno-giol-4a81b477\n\nAlgo mas en que pueda ayudarte?"
             ],
-            chips: ["Servicios", "Esta disponible?", "Portfolio"]
+            chips: ["Descargar CV", "Ver portfolio", "Esta disponible?"]
         },
+
+        // ── Cierre y estados especiales ───────────────────────────
+
         thanks: {
-            patterns: ["gracias", "thank", "genial", "excelente", "perfecto", "ok", "bien", "chevere", "buenisimo", "increible", "copado", "bacano", "estuvo bien", "muy bien"],
+            patterns: ["gracias", "thank", "genial", "excelente", "perfecto", "bien", "chevere", "buenisimo", "increible", "copado", "muy bien", "estuvo bien", "buenaza"],
             responses: [
-                "De nada! Fue un placer. Si necesitas algo mas, aqui estare.",
-                "Con gusto! Espero haberte ayudado. Hay algo mas que quieras saber?",
-                "Que bueno! Si en algun momento quieres retomar, solo escribeme."
+                "De nada! Un placer. Algo mas en que pueda ayudarte?",
+                "Con gusto! Espero haberte ayudado. Hay algo mas?",
+                "Que bueno! Si necesitas algo mas, aqui estoy."
             ],
-            chips: ["Servicios", "Contacto", "Portfolio"]
+            chips: ["Ver servicios", "Contacto directo", "Ver portfolio"]
         },
+
         farewell: {
-            patterns: ["adios", "bye", "chao", "hasta luego", "nos vemos", "hasta pronto", "me voy", "ciao"],
+            patterns: ["adios", "bye", "chao", "hasta luego", "nos vemos", "hasta pronto", "me voy", "ciao", "cerrar", "reiniciar"],
             responses: [
-                "Hasta luego! Fue un placer charlar contigo.",
-                "Chao! Espero haberte ayudado. Vuelve cuando quieras.",
-                "Nos vemos! Si necesitas algo, aqui estare."
+                "Hasta luego! Fue un placer. Vuelve cuando quieras.",
+                "Chao! Si necesitas algo mas de Bruno, aqui estare.",
+                "Nos vemos! Puedes reiniciar la conversacion cuando quieras."
             ],
-            chips: []
-        },
-        negative: {
-            patterns: ["no me ayudo", "no entiendo", "no sirve", "mal", "error", "fallo", "no funciona", "no es lo que buscaba"],
-            responses: [
-                "Ups, lo siento. Soy un chatbot sencillo, asi que a veces me pierdo. Te recomiendo contactar directamente a Bruno. Te paso sus datos?",
-                "Entiendo, puede que no tenga informacion sobre eso. Lo mejor seria escribirle directamente a Bruno."
-            ],
-            chips: ["Contacto", "Quien es Bruno?", "Servicios"]
+            chips: ["Reiniciar chat"]
         }
     };
 
-    var defaultResponses = [
-        { text: "Mmm, no estoy seguro de como responder eso. Puedo contarte sobre Bruno, sus servicios, experiencia o como contactarlo.", chips: ["Quien es Bruno?", "Servicios", "Contacto", "Portfolio"] },
-        { text: "No tengo info sobre eso, pero puedo ayudarte con otras cosas. Que quieres saber de Bruno?", chips: ["Experiencia", "Habilidades", "Contacto"] }
-    ];
-
-    var lastKey = null;
-    var lastResponse = "";
+    // ── Fallbacks de 2 niveles ──────────────────────────────────────
+    var fallback1 = {
+        text: "Mmm, no capto bien la pregunta. Puedes reformularla? O elige una opcion:",
+        chips: ["Ver experiencia", "Servicios", "Contacto directo", "Descargar CV"]
+    };
+    var fallback2 = {
+        text: "Parece que no encuentro lo que buscas. Te recomiendo escribirle directamente a Bruno, el podra ayudarte mejor.",
+        chips: ["Contacto directo", "Descargar CV", "Ver portfolio", "Reiniciar chat"]
+    };
 
     // ── Helpers ─────────────────────────────────────────────────────
     function normalize(str) {
@@ -329,7 +426,15 @@
 
     function getResponse(input) {
         var norm = normalize(input);
-        var bestKey = null;
+
+        // Accion especial: reiniciar chat
+        if (norm.indexOf("reiniciar") !== -1 || norm === "reiniciar chat") {
+            resetChat();
+            return null;
+        }
+
+        // Clasificador ponderado por puntaje
+        var bestKey   = null;
         var bestScore = 0;
 
         for (var key in KB) {
@@ -342,25 +447,31 @@
             }
             if (score > bestScore) {
                 bestScore = score;
-                bestKey = key;
+                bestKey   = key;
             }
         }
 
         if (bestKey) {
+            fallbackCount = 0; // reset contador al tener exito
             var responses = KB[bestKey].responses;
             var text;
+            // Guardia anti-repeticion
             if (responses.length > 1 && lastKey === bestKey) {
                 var filtered = responses.filter(function(r) { return r !== lastResponse; });
                 text = pickRandom(filtered.length ? filtered : responses);
             } else {
                 text = pickRandom(responses);
             }
-            lastKey = bestKey;
+            lastKey      = bestKey;
             lastResponse = text;
             return { text: text, chips: KB[bestKey].chips || [] };
         }
 
-        return pickRandom(defaultResponses);
+        // Fallback nivel 1 y 2
+        fallbackCount++;
+        if (fallbackCount === 1) return fallback1;
+        fallbackCount = 0;
+        return fallback2;
     }
 
     // ── DOM refs ─────────────────────────────────────────────────────
@@ -376,7 +487,7 @@
     var isOpen   = false;
     var isTyping = false;
 
-    // ── Render functions ─────────────────────────────────────────────
+    // ── Render ───────────────────────────────────────────────────────
     function appendMessage(text, sender) {
         var div = document.createElement("div");
         div.className = "chatbot-msg " + sender;
@@ -417,7 +528,19 @@
         messages.scrollTop = messages.scrollHeight;
     }
 
-    // ── Send logic ───────────────────────────────────────────────────
+    function resetChat() {
+        messages.innerHTML = "";
+        chips.innerHTML    = "";
+        lastKey            = null;
+        lastResponse       = "";
+        fallbackCount      = 0;
+        setTimeout(function () {
+            appendMessage("Chat reiniciado. Como puedo ayudarte?", "bot");
+            renderChips(["Soy reclutador", "Busco freelancer", "Quien es Bruno?", "Ver experiencia"]);
+        }, 300);
+    }
+
+    // ── Send logic ────────────────────────────────────────────────────
     function sendMessage(text) {
         if (isTyping) return;
         text = text.trim();
@@ -430,27 +553,29 @@
         isTyping = true;
         showTyping();
 
-        var delay = 700 + Math.random() * 700;
+        var delay = 650 + Math.random() * 650;
         setTimeout(function () {
             hideTyping();
             var res = getResponse(text);
-            appendMessage(res.text, "bot");
-            renderChips(res.chips);
+            if (res) {
+                appendMessage(res.text, "bot");
+                renderChips(res.chips);
+            }
             isTyping = false;
         }, delay);
     }
 
-    // ── Events ───────────────────────────────────────────────────────
+    // ── Events ────────────────────────────────────────────────────────
     toggle.addEventListener("click", function () {
         isOpen = !isOpen;
-        window_.style.display = isOpen ? "flex" : "none";
-        iconOpen.style.display  = isOpen ? "none"  : "inline";
+        window_.style.display  = isOpen ? "flex"   : "none";
+        iconOpen.style.display  = isOpen ? "none"   : "inline";
         iconClose.style.display = isOpen ? "inline" : "none";
 
         if (isOpen && messages.children.length === 0) {
             setTimeout(function () {
-                appendMessage("Hola! Soy el asistente virtual de Bruno Giol. Puedo contarte sobre su experiencia, servicios, habilidades y mas. Por donde empezamos?", "bot");
-                renderChips(["Quien es Bruno?", "Servicios", "Experiencia", "Contacto"]);
+                appendMessage("Hola! Soy el asistente de Bruno Giol. Soy reclutador, cliente o simplemente curioso?", "bot");
+                renderChips(["Soy reclutador", "Busco freelancer", "Quien es Bruno?", "Ver experiencia"]);
             }, 350);
         }
         if (isOpen) input.focus();

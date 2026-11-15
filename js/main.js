@@ -363,9 +363,10 @@
         // ── 6. Conversion Agil ─────────────────────────────────────
 
         cv: {
-            patterns: ["descargar cv", "bajar cv", "cv pdf", "descargar curriculum", "ver cv", "curriculum vitae", "hoja de vida"],
+            patterns: ["cv", "curriculum", "hoja de vida", "descargar cv", "bajar cv", "cv pdf", "descargar curriculum", "ver cv", "curriculum vitae", "donde esta el cv", "donde encuentro el cv", "donde puedo encontrar", "encontrar cv", "encontrar el cv", "como descargo", "descarga", "download"],
             responses: [
-                "Puedes descargar el CV de Bruno directamente desde esta pagina: busca el boton 'Download CV' en la seccion principal (inicio). Esta en formato PDF y esta actualizado."
+                "Puedes descargar el CV de Bruno aqui mismo!\n\nVe a la seccion de inicio (la primera pantalla con la foto de Bruno) y encontraras el boton 'Download CV' en color blanco. Al hacer clic se descarga el PDF directamente.",
+                "El CV esta disponible para descarga en la parte superior de esta pagina. En la seccion Hero (inicio), hay un boton que dice 'Download CV'. Hacele clic y se descarga el PDF actualizado."
             ],
             chips: ["Contacto directo", "Ver portfolio", "Ver experiencia"]
         },

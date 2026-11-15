@@ -1,0 +1,596 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="utf-8">
+    <title>Chatbot Flow — Bruno Giol</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: "Segoe UI", system-ui, sans-serif;
+            background: #f0f4f8;
+            color: #2d3748;
+            padding: 40px 24px;
+        }
+
+        h1 {
+            text-align: center;
+            font-size: 22px;
+            font-weight: 700;
+            margin-bottom: 6px;
+            color: #1a202c;
+        }
+        .subtitle {
+            text-align: center;
+            font-size: 13px;
+            color: #718096;
+            margin-bottom: 40px;
+        }
+
+        /* ── Layout ── */
+        .flow {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0;
+        }
+
+        /* ── Nodes ── */
+        .node {
+            border-radius: 12px;
+            padding: 14px 22px;
+            font-size: 13.5px;
+            line-height: 1.5;
+            text-align: center;
+            position: relative;
+            max-width: 420px;
+            width: 100%;
+        }
+        .node-trigger {
+            background: #0BCEAF;
+            color: white;
+            font-weight: 600;
+            font-size: 14px;
+        }
+        .node-bot {
+            background: #fff;
+            border: 2px solid #0BCEAF;
+            color: #2d3748;
+        }
+        .node-info {
+            background: #EBF8FF;
+            border: 1.5px solid #90CDF4;
+            color: #2b6cb0;
+            font-size: 12.5px;
+        }
+
+        /* ── Arrow ── */
+        .arrow {
+            width: 2px;
+            height: 28px;
+            background: #0BCEAF;
+            margin: 0 auto;
+            position: relative;
+        }
+        .arrow::after {
+            content: "";
+            position: absolute;
+            bottom: -6px;
+            left: 50%;
+            transform: translateX(-50%);
+            border-left: 6px solid transparent;
+            border-right: 6px solid transparent;
+            border-top: 8px solid #0BCEAF;
+        }
+
+        /* ── Chips inline ── */
+        .chips {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 6px;
+            margin-top: 10px;
+        }
+        .chip {
+            background: #E6FFFA;
+            border: 1.5px solid #0BCEAF;
+            color: #0BCEAF;
+            border-radius: 20px;
+            padding: 4px 12px;
+            font-size: 11.5px;
+            font-weight: 500;
+        }
+
+        /* ── Intents grid ── */
+        .section-title {
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: #718096;
+            margin: 36px 0 16px;
+            text-align: center;
+        }
+
+        .intents-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 14px;
+            width: 100%;
+            max-width: 980px;
+        }
+
+        .intent-card {
+            background: #fff;
+            border-radius: 12px;
+            padding: 16px 18px;
+            border-left: 4px solid #0BCEAF;
+            box-shadow: 0 1px 6px rgba(0,0,0,0.07);
+            transition: box-shadow 0.2s;
+        }
+        .intent-card:hover {
+            box-shadow: 0 4px 16px rgba(11,206,175,0.18);
+        }
+        .intent-card.special {
+            border-left-color: #F6AD55;
+        }
+        .intent-card.default-card {
+            border-left-color: #FC8181;
+        }
+
+        .intent-name {
+            font-weight: 700;
+            font-size: 13px;
+            color: #1a202c;
+            margin-bottom: 6px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .intent-name .badge {
+            font-size: 10px;
+            padding: 2px 7px;
+            border-radius: 10px;
+            font-weight: 600;
+        }
+        .badge-active  { background: #C6F6D5; color: #276749; }
+        .badge-special { background: #FEEBC8; color: #975A16; }
+        .badge-default { background: #FED7D7; color: #9B2C2C; }
+
+        .keywords {
+            font-size: 11.5px;
+            color: #718096;
+            margin-bottom: 8px;
+        }
+        .keywords span {
+            background: #EDF2F7;
+            border-radius: 4px;
+            padding: 1px 6px;
+            margin: 2px 2px 2px 0;
+            display: inline-block;
+        }
+
+        .intent-chips {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 5px;
+            margin-top: 8px;
+        }
+        .intent-chip {
+            background: #E6FFFA;
+            border: 1px solid #81E6D9;
+            color: #234E52;
+            border-radius: 20px;
+            padding: 3px 10px;
+            font-size: 11px;
+        }
+
+        /* ── Experience branch ── */
+        .branch-section {
+            width: 100%;
+            max-width: 980px;
+            margin-top: 10px;
+        }
+        .branch-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+            gap: 12px;
+        }
+        .branch-card {
+            background: #fff;
+            border-radius: 10px;
+            padding: 14px 16px;
+            border-top: 3px solid #0BCEAF;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+            font-size: 12.5px;
+        }
+        .branch-card h4 {
+            font-size: 13px;
+            font-weight: 700;
+            color: #0BCEAF;
+            margin-bottom: 4px;
+        }
+        .branch-card p {
+            color: #4a5568;
+            font-size: 12px;
+            line-height: 1.5;
+        }
+
+        /* ── Logic box ── */
+        .logic-box {
+            background: #FFFBEB;
+            border: 1.5px dashed #F6AD55;
+            border-radius: 10px;
+            padding: 14px 20px;
+            max-width: 480px;
+            width: 100%;
+            font-size: 12.5px;
+            color: #744210;
+            text-align: center;
+            line-height: 1.6;
+        }
+        .logic-box strong { font-weight: 700; }
+
+        /* ── Conversion funnel ── */
+        .funnel {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0;
+            width: 100%;
+            max-width: 420px;
+        }
+        .funnel-step {
+            width: 100%;
+            padding: 10px 20px;
+            border-radius: 8px;
+            text-align: center;
+            font-size: 12.5px;
+            font-weight: 500;
+        }
+        .funnel-step:nth-child(1) { background: #0BCEAF; color: white; }
+        .funnel-step:nth-child(3) { background: #38B2AC; color: white; }
+        .funnel-step:nth-child(5) { background: #2C7A7B; color: white; }
+        .funnel-step:nth-child(7) { background: #1D4044; color: white; }
+
+        .funnel-arrow {
+            font-size: 18px;
+            color: #0BCEAF;
+            line-height: 1.2;
+        }
+
+        footer {
+            text-align: center;
+            margin-top: 48px;
+            font-size: 11.5px;
+            color: #a0aec0;
+        }
+    </style>
+</head>
+<body>
+
+<div class="flow">
+    <h1>Chatbot Flow — Bruno Giol</h1>
+    <p class="subtitle">Mapa completo de intenciones, respuestas y chips de navegación</p>
+
+    <!-- Entry point -->
+    <div class="node node-trigger">🤖 Usuario abre el chat</div>
+    <div class="arrow"></div>
+    <div class="node node-bot">
+        "Hola! Soy el asistente virtual de Bruno Giol. Puedo contarte sobre su experiencia, servicios, habilidades y más. ¿Por dónde empezamos?"
+        <div class="chips">
+            <span class="chip">¿Quién es Bruno?</span>
+            <span class="chip">Servicios</span>
+            <span class="chip">Experiencia</span>
+            <span class="chip">Contacto</span>
+        </div>
+    </div>
+    <div class="arrow"></div>
+    <div class="node node-info">
+        El usuario escribe texto libre o hace clic en un chip.<br>
+        El motor normaliza el texto (minúsculas, sin tildes) y busca coincidencias por <strong>puntaje</strong> — gana la intención con más longitud de patrones coincidentes.
+    </div>
+</div>
+
+
+<!-- Intents -->
+<p class="section-title">Intenciones del chatbot (16 en total)</p>
+
+<div class="intents-grid" style="margin: 0 auto;">
+
+    <div class="intent-card">
+        <div class="intent-name">👋 Saludo <span class="badge badge-active">greeting</span></div>
+        <div class="keywords">
+            <span>hola</span><span>hi</span><span>hey</span><span>saludos</span>
+            <span>buenas</span><span>como estas</span><span>buen dia</span>
+        </div>
+        <div class="intent-chips">
+            <span class="intent-chip">¿Quién es Bruno?</span>
+            <span class="intent-chip">Servicios</span>
+            <span class="intent-chip">Experiencia</span>
+            <span class="intent-chip">Contacto</span>
+        </div>
+    </div>
+
+    <div class="intent-card">
+        <div class="intent-name">🙋 Sobre Bruno <span class="badge badge-active">about</span></div>
+        <div class="keywords">
+            <span>quien es</span><span>sobre bruno</span><span>cuentame</span>
+            <span>presentate</span><span>acerca</span>
+        </div>
+        <div class="intent-chips">
+            <span class="intent-chip">Servicios</span>
+            <span class="intent-chip">Experiencia</span>
+            <span class="intent-chip">Habilidades</span>
+            <span class="intent-chip">Contacto</span>
+        </div>
+    </div>
+
+    <div class="intent-card">
+        <div class="intent-name">🎨 Servicios <span class="badge badge-active">services</span></div>
+        <div class="keywords">
+            <span>servicios</span><span>que hace</span><span>que ofrece</span>
+            <span>como ayuda</span><span>en que ayuda</span>
+        </div>
+        <div class="intent-chips">
+            <span class="intent-chip">Portfolio</span>
+            <span class="intent-chip">Experiencia</span>
+            <span class="intent-chip">Contacto</span>
+            <span class="intent-chip">¿Está disponible?</span>
+        </div>
+    </div>
+
+    <div class="intent-card">
+        <div class="intent-name">🏢 Experiencia <span class="badge badge-active">experience</span></div>
+        <div class="keywords">
+            <span>experiencia</span><span>empresas</span><span>trayectoria</span>
+            <span>carrera</span><span>cv</span><span>historial</span>
+        </div>
+        <div class="intent-chips">
+            <span class="intent-chip">ONPE</span>
+            <span class="intent-chip">Stefanini</span>
+            <span class="intent-chip">Belcorp</span>
+            <span class="intent-chip">Contacto</span>
+        </div>
+    </div>
+
+    <div class="intent-card special">
+        <div class="intent-name">🗳️ ONPE <span class="badge badge-special">onpe</span></div>
+        <div class="keywords">
+            <span>onpe</span><span>elecciones</span><span>estado</span>
+            <span>sector publico</span><span>electoral</span>
+        </div>
+        <p style="font-size:11.5px; color:#744210; margin: 6px 0 8px;">Rol actual desde marzo 2025</p>
+        <div class="intent-chips">
+            <span class="intent-chip">Otras empresas</span>
+            <span class="intent-chip">Habilidades</span>
+            <span class="intent-chip">Portfolio</span>
+            <span class="intent-chip">Contacto</span>
+        </div>
+    </div>
+
+    <div class="intent-card special">
+        <div class="intent-name">📦 Stefanini <span class="badge badge-special">stefanini</span></div>
+        <div class="keywords">
+            <span>stefanini</span><span>scharff</span><span>courier</span>
+            <span>facturacion</span>
+        </div>
+        <p style="font-size:11.5px; color:#744210; margin: 6px 0 8px;">Senior UX/UI + Scrum Master (2022–2024)</p>
+        <div class="intent-chips">
+            <span class="intent-chip">ONPE</span>
+            <span class="intent-chip">Belcorp</span>
+            <span class="intent-chip">Habilidades</span>
+            <span class="intent-chip">Contacto</span>
+        </div>
+    </div>
+
+    <div class="intent-card special">
+        <div class="intent-name">💄 Belcorp <span class="badge badge-special">belcorp</span></div>
+        <div class="keywords">
+            <span>belcorp</span><span>esika</span><span>cyzone</span>
+            <span>lbel</span><span>mailing</span><span>sap</span>
+        </div>
+        <p style="font-size:11.5px; color:#744210; margin: 6px 0 8px;">UI Designer / Front-End (2019–2022)</p>
+        <div class="intent-chips">
+            <span class="intent-chip">Ver portfolio</span>
+            <span class="intent-chip">ONPE</span>
+            <span class="intent-chip">Stefanini</span>
+            <span class="intent-chip">Contacto</span>
+        </div>
+    </div>
+
+    <div class="intent-card special">
+        <div class="intent-name">🌽 Wasi Mikuna <span class="badge badge-special">wasimikuna</span></div>
+        <div class="keywords">
+            <span>wasi mikuna</span><span>qaliwarma</span><span>mikuna</span>
+            <span>alimentacion</span>
+        </div>
+        <p style="font-size:11.5px; color:#744210; margin: 6px 0 8px;">Senior UX/UI + Scrum Master (12/2024–02/2025)</p>
+        <div class="intent-chips">
+            <span class="intent-chip">ONPE</span>
+            <span class="intent-chip">Stefanini</span>
+            <span class="intent-chip">Habilidades</span>
+            <span class="intent-chip">Contacto</span>
+        </div>
+    </div>
+
+    <div class="intent-card">
+        <div class="intent-name">🛠️ Habilidades <span class="badge badge-active">skills</span></div>
+        <div class="keywords">
+            <span>habilidades</span><span>skills</span><span>figma</span>
+            <span>tecnologia</span><span>herramientas</span><span>domina</span>
+        </div>
+        <div class="intent-chips">
+            <span class="intent-chip">Educacion</span>
+            <span class="intent-chip">Experiencia</span>
+            <span class="intent-chip">Portfolio</span>
+            <span class="intent-chip">Contacto</span>
+        </div>
+    </div>
+
+    <div class="intent-card">
+        <div class="intent-name">🎓 Educación <span class="badge badge-active">education</span></div>
+        <div class="keywords">
+            <span>educacion</span><span>estudios</span><span>certificacion</span>
+            <span>titulo</span><span>formacion</span><span>universidad</span>
+        </div>
+        <div class="intent-chips">
+            <span class="intent-chip">Habilidades</span>
+            <span class="intent-chip">Experiencia</span>
+            <span class="intent-chip">Contacto</span>
+        </div>
+    </div>
+
+    <div class="intent-card">
+        <div class="intent-name">🖼️ Portfolio <span class="badge badge-active">portfolio</span></div>
+        <div class="keywords">
+            <span>portfolio</span><span>proyecto</span><span>diseno</span>
+            <span>ver trabajo</span><span>muestra</span>
+        </div>
+        <div class="intent-chips">
+            <span class="intent-chip">Belcorp</span>
+            <span class="intent-chip">Stefanini</span>
+            <span class="intent-chip">ONPE</span>
+            <span class="intent-chip">Contacto</span>
+        </div>
+    </div>
+
+    <div class="intent-card">
+        <div class="intent-name">🚀 Disponibilidad <span class="badge badge-active">availability</span></div>
+        <div class="keywords">
+            <span>disponible</span><span>freelance</span><span>contratar</span>
+            <span>colaborar</span><span>propuesta</span>
+        </div>
+        <div class="intent-chips">
+            <span class="intent-chip">Contacto</span>
+            <span class="intent-chip">Servicios</span>
+            <span class="intent-chip">Portfolio</span>
+        </div>
+    </div>
+
+    <div class="intent-card">
+        <div class="intent-name">📞 Contacto <span class="badge badge-active">contact</span></div>
+        <div class="keywords">
+            <span>contacto</span><span>email</span><span>telefono</span>
+            <span>linkedin</span><span>escribir</span><span>mensaje</span>
+        </div>
+        <div class="intent-chips">
+            <span class="intent-chip">Servicios</span>
+            <span class="intent-chip">¿Está disponible?</span>
+            <span class="intent-chip">Portfolio</span>
+        </div>
+    </div>
+
+    <div class="intent-card">
+        <div class="intent-name">🙏 Agradecimiento <span class="badge badge-active">thanks</span></div>
+        <div class="keywords">
+            <span>gracias</span><span>genial</span><span>perfecto</span>
+            <span>chevere</span><span>buenisimo</span><span>excelente</span>
+        </div>
+        <div class="intent-chips">
+            <span class="intent-chip">Servicios</span>
+            <span class="intent-chip">Contacto</span>
+            <span class="intent-chip">Portfolio</span>
+        </div>
+    </div>
+
+    <div class="intent-card">
+        <div class="intent-name">👋 Despedida <span class="badge badge-active">farewell</span></div>
+        <div class="keywords">
+            <span>adios</span><span>bye</span><span>chao</span>
+            <span>hasta luego</span><span>nos vemos</span>
+        </div>
+        <div class="intent-chips" style="color:#718096; font-size:11.5px; padding-top:4px;">
+            (sin chips — fin de conversación)
+        </div>
+    </div>
+
+    <div class="intent-card default-card">
+        <div class="intent-name">❓ Negativo / Default <span class="badge badge-default">fallback</span></div>
+        <div class="keywords">
+            <span>no sirve</span><span>error</span><span>no funciona</span>
+            <span>(ningún patrón)</span>
+        </div>
+        <div class="intent-chips">
+            <span class="intent-chip">Contacto</span>
+            <span class="intent-chip">¿Quién es Bruno?</span>
+            <span class="intent-chip">Servicios</span>
+        </div>
+    </div>
+
+</div>
+
+
+<!-- Logic -->
+<p class="section-title">Lógica interna</p>
+
+<div class="flow" style="gap: 14px;">
+    <div class="logic-box">
+        <strong>Motor de matching por puntaje</strong><br>
+        Para cada intención, suma la longitud de todos los patrones que coincidan en el input normalizado. Gana la intención con mayor puntaje. Esto evita falsos positivos por patrones cortos.
+    </div>
+    <div class="logic-box">
+        <strong>Anti-repetición</strong><br>
+        Si el usuario pregunta lo mismo dos veces seguidas, el bot descarta la última respuesta usada y elige una diferente del mismo tema (cuando hay más de una respuesta disponible).
+    </div>
+    <div class="logic-box">
+        <strong>Normalización de texto</strong><br>
+        Todo input pasa por: minúsculas → quitar tildes (NFD) → quitar caracteres especiales → trim. Así "¿Quién es BRUNO?" y "quien es bruno" son equivalentes.
+    </div>
+</div>
+
+
+<!-- Conversion funnel -->
+<p class="section-title">Flujo de conversión (objetivo principal)</p>
+
+<div class="funnel" style="margin: 0 auto;">
+    <div class="funnel-step">Cualquier intención</div>
+    <div class="funnel-arrow">↓</div>
+    <div class="funnel-step">Chip "Contacto" disponible</div>
+    <div class="funnel-arrow">↓</div>
+    <div class="funnel-step">Intención: contact</div>
+    <div class="funnel-arrow">↓</div>
+    <div class="funnel-step">📧 brunogiol78@gmail.com · 📱 +51-999-971-342 · 💼 LinkedIn</div>
+</div>
+
+
+<!-- Experience branch -->
+<p class="section-title">Rama de experiencia laboral</p>
+
+<div class="branch-section" style="margin: 0 auto;">
+    <div class="branch-grid">
+        <div class="branch-card">
+            <h4>🗳️ ONPE</h4>
+            <p>Rol actual · UX/UI Designer<br>desde marzo 2025<br><br>→ Otras empresas → Habilidades</p>
+        </div>
+        <div class="branch-card">
+            <h4>📦 Stefanini LATAM</h4>
+            <p>Senior UX/UI + Scrum Master<br>11/2022 – 11/2024<br><br>→ ONPE → Belcorp</p>
+        </div>
+        <div class="branch-card">
+            <h4>💄 Belcorp</h4>
+            <p>UI Designer / Front-End<br>09/2019 – 11/2022<br><br>→ Portfolio → ONPE → Stefanini</p>
+        </div>
+        <div class="branch-card">
+            <h4>🌽 Wasi Mikuna</h4>
+            <p>Senior UX/UI + Scrum Master<br>12/2024 – 02/2025<br><br>→ ONPE → Stefanini</p>
+        </div>
+        <div class="branch-card">
+            <h4>🏥 Clínica Internacional</h4>
+            <p>Digital Designer<br>10/2018 – 09/2019<br><br>(mencionada en experiencia general)</p>
+        </div>
+        <div class="branch-card">
+            <h4>🏦 Banco Financiero</h4>
+            <p>UI Designer / Front-End<br>08/2016 – 10/2018<br><br>(mencionada en experiencia general)</p>
+        </div>
+    </div>
+</div>
+
+
+<footer>
+    Generado para brunogiol.github.io · Chatbot v2 · 2025
+</footer>
+
+</body>
+</html>

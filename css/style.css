@@ -10265,3 +10265,19 @@ h1.display-3.text-uppercase.text-primary.mb-2 {
     #chatbot-window { width: calc(100vw - 24px); }
     #chatbot-wrapper { right: 12px; bottom: 20px; }
 }
+
+/* Chatbot Slider Modal */
+#chatbotSliderModal .modal-content {
+    background: #111 !important;
+}
+#chatbotSliderModal .carousel-item {
+    background: #111;
+    text-align: center;
+}
+#chatbotSliderModal .carousel-indicators li {
+    background-color: #0BCEAF;
+}
+#chatbotSliderModal .carousel-control-prev-icon,
+#chatbotSliderModal .carousel-control-next-icon {
+    filter: invert(0);
+}

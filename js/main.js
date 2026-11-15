@@ -131,6 +131,11 @@
 
     // Portfolio Video Modal
     $(document).ready(function () {
+        // Reset chatbot slider to first slide on close
+        $('#chatbotSliderModal').on('hidden.bs.modal', function () {
+            $('#chatbotCarousel').carousel(0);
+        });
+
         $('#portfolioVideoModal').on('show.bs.modal', function (e) {
             var videoSrc = $(e.relatedTarget).data('video');
             var $video = $('#portfolioVideo');

@@ -543,9 +543,9 @@
                     </div>
                 </a>
 
-                <a href="img/chatbot_portafolio/chatbot_portafolio.jpg" data-lightbox="portfolio" class="col-lg-4 col-md-6 mb-4 portfolio-item first">
+                <a href="#" data-toggle="modal" data-target="#chatbotSliderModal" class="col-lg-4 col-md-6 mb-4 portfolio-item first">
                     <div class="position-relative overflow-hidden mb-2">
-                        <img class="img-fluid rounded w-100" src="img/chatbot_portafolio/chatbot_portafolio.jpg" alt="esika_EMOTIONS_MX">
+                        <img class="img-fluid rounded w-100" src="img/chatbot_portafolio/chatbot_portafolio.jpg" alt="Chatbot Portfolio">
                         <div class="portfolio-btn bg-primary d-flex align-items-center justify-content-center">
                             <div>
                                 <i class="fa fa-plus text-white" style="font-size: 60px;"></i>
@@ -564,6 +564,45 @@
 
 
 
+
+    <!-- Chatbot Slider Modal Start -->
+    <div class="modal fade" id="chatbotSliderModal" tabindex="-1" role="dialog" aria-hidden="true">
+        <div class="modal-dialog modal-xl modal-dialog-centered" role="document">
+            <div class="modal-content bg-dark border-0">
+                <div class="modal-body p-0 position-relative">
+                    <button type="button" class="close text-white position-absolute" style="top:10px;right:15px;z-index:10;" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                    <div id="chatbotCarousel" class="carousel slide" data-ride="carousel">
+                        <!-- Indicators -->
+                        <ol class="carousel-indicators">
+                            <li data-target="#chatbotCarousel" data-slide-to="0" class="active"></li>
+                            <li data-target="#chatbotCarousel" data-slide-to="1"></li>
+                        </ol>
+                        <!-- Slides -->
+                        <div class="carousel-inner">
+                            <div class="carousel-item active">
+                                <img src="img/chatbot_portafolio/chatbot_portafolio.jpg" class="d-block w-100" alt="Chatbot Portfolio" style="max-height:85vh; object-fit:contain;">
+                            </div>
+                            <div class="carousel-item">
+                                <img src="img/chatbot_portafolio/chatbot_flujo_conversacional.jpg" class="d-block w-100" alt="Chatbot Flujo Conversacional" style="max-height:85vh; object-fit:contain;">
+                            </div>
+                        </div>
+                        <!-- Controls -->
+                        <a class="carousel-control-prev" href="#chatbotCarousel" role="button" data-slide="prev">
+                            <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                            <span class="sr-only">Anterior</span>
+                        </a>
+                        <a class="carousel-control-next" href="#chatbotCarousel" role="button" data-slide="next">
+                            <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                            <span class="sr-only">Siguiente</span>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Chatbot Slider Modal End -->
 
     <!-- Portfolio Video Modal Start -->
     <div class="modal fade" id="portfolioVideoModal" tabindex="-1" role="dialog" aria-hidden="true">
